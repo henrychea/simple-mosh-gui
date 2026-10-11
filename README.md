@@ -41,8 +41,15 @@ non-zero if none — handy for scripts.
   (macOS) and `/usr/local/bin`, `/usr/bin` (Linux and manual installs).
 - Starts `mosh-server new` with 256 colors (toggleable) and an optional port.
 - Shows the connect line and `MOSH_KEY=<key> mosh-client <ip> <port>`, each one
-  click to copy. The IP is pre-filled from the default route and is editable.
+  click to copy — the chip answers with “Copied”. The IP is pre-filled from the
+  default route, and is editable.
 - Streams the server's raw output and can stop the session.
+
+The window is a compact 480×620 panel: a status pill up top (`ready` /
+`running 00:12` / `mosh-server missing`), the controls in one row, the connect
+details once a session is up, and the output below — which sticks to the newest
+line. It uses San Francisco when it runs on macOS, and a matching glass theme
+everywhere.
 
 Notes:
 
