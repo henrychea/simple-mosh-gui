@@ -116,9 +116,6 @@ impl eframe::App for App {
         }
 
         egui::Panel::top("header").show(ui, |ui| {
-            if cfg!(target_os = "android") {
-                ui.add_space(28.0); // keep clear of the Android status bar
-            }
             ui.add_space(4.0);
             match &self.server {
                 Some(server) => {
@@ -150,7 +147,6 @@ impl eframe::App for App {
                     egui::Color32::YELLOW,
                     format!("found, but cannot be executed here: {err}"),
                 );
-                ui.label("On Android, run `mosh-server new` inside Termux instead.");
             }
             ui.add_space(4.0);
             ui.horizontal(|ui| {
@@ -224,12 +220,10 @@ impl eframe::App for App {
 }
 
 fn install_hint() -> &'static str {
-    if cfg!(target_os = "android") {
-        "install inside Termux: pkg install mosh"
-    } else if cfg!(target_os = "macos") {
+    if cfg!(target_os = "macos") {
         "install with Homebrew: brew install mosh"
     } else {
-        "install mosh with your package manager"
+        "install mosh with your package manager, e.g. sudo apt install mosh"
     }
 }
 
@@ -247,19 +241,4 @@ pub fn run_desktop() -> eframe::Result {
         eframe::NativeOptions::default(),
         Box::new(|_cc| Ok(Box::new(App::new()))),
     )
-}
-
-#[cfg(target_os = "android")]
-#[unsafe(no_mangle)]
-fn android_main(app: winit::platform::android::activity::AndroidApp) {
-    let options = eframe::NativeOptions {
-        android_app: Some(app),
-        ..Default::default()
-    };
-    eframe::run_native(
-        "Simple Mosh GUI",
-        options,
-        Box::new(|_cc| Ok(Box::new(App::new()))),
-    )
-    .unwrap();
 }

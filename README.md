@@ -4,7 +4,9 @@ A tiny Rust/egui app that finds `mosh-server` on your machine, starts it, and
 hands you the connection details — the `MOSH CONNECT <port> <key>` line and a
 ready-to-copy `mosh-client` command.
 
-Built for macOS (verified) and Android (Termux today, native-APK scaffolding).
+Built for macOS and Linux — wherever `mosh-server` runs. Your phone (Android
+included) is just a client: connect to the session with any mosh client, using
+the command this app hands you or plain `mosh user@host`.
 
 ![Simple Mosh GUI](screenshot.png)
 
@@ -19,7 +21,8 @@ terminal. This is a small panel around that
 ## Install mosh
 
 - macOS: `brew install mosh` (or MacPorts: `sudo port install mosh`)
-- Android/Termux: `pkg install mosh`
+- Debian/Ubuntu: `sudo apt install mosh` · Fedora: `sudo dnf install mosh` ·
+  Arch: `sudo pacman -S mosh`
 
 ## Run
 
@@ -34,9 +37,8 @@ non-zero if none — handy for scripts.
 
 ## What it does
 
-- Detects `mosh-server` in `$PATH`, plus `/opt/homebrew/bin`, `/usr/local/bin`,
-  `/opt/local/bin`; on Android also `/data/data/com.termux/files/usr/bin`,
-  `/data/local/tmp`, and `$HOME`.
+- Detects `mosh-server` in `$PATH`, plus `/opt/homebrew/bin`, `/opt/local/bin`
+  (macOS) and `/usr/local/bin`, `/usr/bin` (Linux and manual installs).
 - Starts `mosh-server new` with 256 colors (toggleable) and an optional port.
 - Shows the connect line and `MOSH_KEY=<key> mosh-client <ip> <port>`, each one
   click to copy. The IP is pre-filled from the default route and is editable.
@@ -53,36 +55,17 @@ Notes:
   Dock), the app passes mosh-server's `-l LANG=en_US.UTF-8` fallback — the same
   trick the mosh client uses when it starts a server over ssh.
 
-## Android
+## Linux
 
-### Termux (works today)
+Same app, same flow: detection covers `$PATH`, `/usr/local/bin` and `/usr/bin`.
+egui's X11 and Wayland backends are both enabled.
 
-Run the GUI inside Termux under [termux-x11](https://github.com/termux/termux-x11)
-(needs the Termux:X11 app *and* its companion package; see that project's
-README):
-
-```sh
-pkg install mosh rust
-git clone https://github.com/henrychea/simple-mosh-gui && cd simple-mosh-gui
-cargo build --release
-termux-x11 :0 & DISPLAY=:0 ./target/release/simple-mosh-gui
-```
-
-Detection finds Termux's `mosh-server` and starting works, because the app runs
-with your Termux user, environment and PATH.
-
-### Native APK (not verified on a device)
+Building from source needs the usual desktop development libraries; if the
+build complains about missing X11/Wayland headers on Debian/Ubuntu:
 
 ```sh
-rustup target add aarch64-linux-android
-cargo install cargo-apk
-cargo apk run --lib
+sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev
 ```
-
-Android's app sandbox normally prevents a standalone app from executing
-Termux's copy of `mosh-server`, so a native APK realistically needs
-`mosh-server` bundled as an app asset (not shipped here yet). The app also
-looks in its own `$HOME`, so a binary extracted there is detected and used.
 
 ## Development
 

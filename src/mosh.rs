@@ -17,8 +17,8 @@ pub struct MoshServer {
     pub path: PathBuf,
     /// e.g. `Some("1.4.0")`, read from the sibling `mosh --version`.
     pub version: Option<String>,
-    /// `Some(err)` when the binary exists but cannot be executed — typically
-    /// the Android app sandbox blocking Termux's copy.
+    /// `Some(err)` when the binary exists but cannot be executed (e.g. a
+    /// `noexec` mount or missing permission).
     pub exec_error: Option<String>,
 }
 
@@ -28,14 +28,13 @@ pub fn candidates() -> Vec<PathBuf> {
     if let Some(path) = std::env::var_os("PATH") {
         dirs.extend(std::env::split_paths(&path));
     }
-    dirs.push(PathBuf::from("/opt/homebrew/bin")); // Homebrew, Apple silicon
-    dirs.push(PathBuf::from("/usr/local/bin")); // Homebrew, Intel / manual installs
-    dirs.push(PathBuf::from("/opt/local/bin")); // MacPorts
-    #[cfg(target_os = "android")]
+    #[cfg(target_os = "macos")]
     {
-        dirs.push(PathBuf::from("/data/data/com.termux/files/usr/bin")); // Termux
-        dirs.push(PathBuf::from("/data/local/tmp"));
+        dirs.push(PathBuf::from("/opt/homebrew/bin")); // Homebrew, Apple silicon
+        dirs.push(PathBuf::from("/opt/local/bin")); // MacPorts
     }
+    dirs.push(PathBuf::from("/usr/local/bin")); // Homebrew (Intel), manual installs
+    dirs.push(PathBuf::from("/usr/bin")); // distro packages
     dirs.into_iter()
         .map(|dir| dir.join("mosh-server"))
         .collect()
@@ -293,8 +292,6 @@ fn locale_has_utf8() -> bool {
 fn default_path() -> &'static str {
     if cfg!(target_os = "macos") {
         "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    } else if cfg!(target_os = "android") {
-        "/system/bin:/system/xbin:/data/data/com.termux/files/usr/bin"
     } else {
         "/usr/local/bin:/usr/bin:/bin"
     }

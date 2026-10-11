@@ -1,4 +1,3 @@
-#[cfg(not(target_os = "android"))]
 fn main() -> eframe::Result {
     if std::env::args().any(|arg| arg == "--detect") {
         match simple_mosh_gui::mosh::find() {
@@ -19,7 +18,3 @@ fn main() -> eframe::Result {
     }
     simple_mosh_gui::run_desktop()
 }
-
-/// Android uses `android_main` in lib.rs; the binary target is unused there.
-#[cfg(target_os = "android")]
-fn main() {}
